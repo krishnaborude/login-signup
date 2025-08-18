@@ -46,14 +46,38 @@ def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return db_user
 
-@app.post("/login", response_model=schemas.Token, 
-         summary="Login with username/email and password",
-         description="Authenticate using either your username or email along with your password")
+
+@app.post(
+    "/login",
+    response_model=schemas.Token,
+    summary="Login with username/email and password",
+    description="Authenticate using either your username or email along with your password",
+    openapi_extra={
+        "requestBody": {
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "username_or_email": {"type": "string"},
+                            "password": {"type": "string"},
+                        },
+                        "required": ["username_or_email", "password"],
+                        "example": {
+                            "username_or_email": "your_username_or_email",
+                            "password": "your_password"
+                        }
+                    }
+                }
+            }
+        }
+    }
+)
 async def login(login_data: schemas.LoginRequest, db: Session = Depends(get_db)):
     # Find user by email or username
     user = db.query(models.User).filter(
-        (models.User.email == login_data.username) |
-        (models.User.username == login_data.username)
+        (models.User.email == login_data.username_or_email) |
+        (models.User.username == login_data.username_or_email)
     ).first()
     if not user:
         raise HTTPException(

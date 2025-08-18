@@ -22,22 +22,32 @@ class TokenData(BaseModel):
     email: str | None = None
 
 class LoginRequest(BaseModel):
-    username: str
+    username_or_email: str
     password: str
 
     class Config:
         json_schema_extra = {
             "example": {
-                "username or email": "your_username_or_email",
+                "username_or_email": "your_username_or_email",
                 "password": "your_password"
             }
         }
         
     # Rename the field in the API documentation
+
     @classmethod
     def model_json_schema(cls, *args, **kwargs):
         schema = super().model_json_schema(*args, **kwargs)
-        # Update the properties to show "username or email" instead of just "username"
-        schema["properties"]["username"]["title"] = "username or email"
-        schema["properties"]["username"]["description"] = "Enter either your username or email address"
+
+        # Reorder properties manually
+        props = schema.get("properties", {})
+        reordered_props = {
+            "username_or_email": props.get("username_or_email"),
+            "password": props.get("password"),
+        }
+        schema["properties"] = reordered_props
+
+        # Ensure required order too
+        schema["required"] = ["username_or_email", "password"]
+
         return schema
