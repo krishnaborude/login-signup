@@ -70,6 +70,12 @@ A robust authentication API built with FastAPI and PostgreSQL that provides secu
    ACCESS_TOKEN_EXPIRE_MINUTES=30
    ```
    Replace `your_password` with your PostgreSQL password and generate a secure `SECRET_KEY`.
+   
+   Generate a Secret Key in Python
+   Run this command in PowerShell or CMD:
+   ```bash 
+   python -c "import secrets; print(secrets.token_hex(32))"
+   ```
 
 ## Database Setup
 
