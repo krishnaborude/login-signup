@@ -68,9 +68,6 @@ def init_db():
     # Create session factory
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     
-    # Create all tables
-    Base.metadata.create_all(bind=engine)
-    
     return engine, SessionLocal
 
 # Initialize database and get engine and SessionLocal
@@ -83,9 +80,13 @@ def get_db():
     finally:
         db.close()
 
-def recreate_tables():
-    print("Dropping all tables...")
-    Base.metadata.drop_all(bind=engine)
-    print("Creating all tables...")
-    Base.metadata.create_all(bind=engine)
-    print("Tables recreated successfully!")
+def create_tables_if_not_exist():
+    inspector = inspect(engine)
+    existing_tables = inspector.get_table_names()
+    
+    if 'users' not in existing_tables:
+        print("Creating tables...")
+        Base.metadata.create_all(bind=engine)
+        print("Tables created successfully!")
+    else:
+        print(f"Tables already exist. Current tables: {existing_tables}")
