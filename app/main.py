@@ -5,10 +5,10 @@ from typing import Annotated
 from datetime import datetime, timedelta
 
 from app import models, schemas, auth
-from app.database import engine, get_db, recreate_tables
+from app.database import engine, get_db, create_tables_if_not_exist
 
-# Initialize database tables
-recreate_tables()
+# Initialize database tables without dropping existing data
+create_tables_if_not_exist()
 
 app = FastAPI(
     title="Authentication API",

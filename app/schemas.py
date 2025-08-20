@@ -74,6 +74,8 @@ class LoginRequest(BaseModel):
 
         return schema
 
+from email_validator import validate_email, EmailNotValidError
+
 class ForgotPasswordRequest(BaseModel):
     username_or_email: str
 
@@ -81,8 +83,8 @@ class ForgotPasswordRequest(BaseModel):
     def validate_username_or_email(cls, v):
         if "@" in v:  # If it looks like an email
             try:
-                EmailStr.validate(v)
-            except ValueError:
+                validate_email(v)
+            except EmailNotValidError:
                 raise ValueError("Invalid email format")
         return v
 
