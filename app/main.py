@@ -1,11 +1,14 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from . import models, schemas, auth
-from .database import engine, get_db
 from typing import Annotated
+from datetime import datetime, timedelta
 
-models.Base.metadata.create_all(bind=engine)
+from app import models, schemas, auth
+from app.database import engine, get_db, recreate_tables
+
+# Initialize database tables
+recreate_tables()
 
 app = FastAPI(
     title="Authentication API",
@@ -29,12 +32,19 @@ def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
         (models.User.username == user.username)
     ).first()
     if db_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email or username already registered"
-        )
+        if db_user.email == user.email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered"
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already taken"
+            )
     
-    # Create new user
+    # The password validation is automatically done by Pydantic
+    # Create new user with hashed password
     hashed_password = auth.get_password_hash(user.password)
     db_user = models.User(
         email=user.email,
@@ -97,3 +107,62 @@ async def login(login_data: schemas.LoginRequest, db: Session = Depends(get_db))
         data={"sub": user.email, "username": user.username}
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+@app.post("/forgot-password", response_model=schemas.PasswordResetResponse)
+def forgot_password(request: schemas.ForgotPasswordRequest, db: Session = Depends(get_db)):
+    # Find user by email
+    user = db.query(models.User).filter(models.User.email == request.email).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No user found with this email address"
+        )
+    
+    # Generate password reset token
+    reset_token = auth.create_password_reset_token(user.email)
+    
+    # Store token and expiry in database
+    user.reset_token = reset_token
+    user.reset_token_expires = datetime.utcnow() + timedelta(hours=24)
+    db.commit()
+    
+    # In a real application, you would send this token via email
+    # For now, we'll return it in the response
+    return {
+        "message": "Password reset token has been generated. Please check your email.",
+        "reset_token": reset_token  # This would be removed in production
+    }
+
+@app.post("/reset-password", response_model=schemas.PasswordResetResponse)
+def reset_password(request: schemas.ResetPasswordRequest, db: Session = Depends(get_db)):
+    # Verify token
+    email = auth.verify_password_reset_token(request.token)
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset token"
+        )
+    
+    # Find user by email and token
+    user = db.query(models.User).filter(
+        models.User.email == email,
+        models.User.reset_token == request.token,
+        models.User.reset_token_expires > datetime.utcnow()
+    ).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset token"
+        )
+    
+    # Password validation is automatically done by Pydantic
+    # Update password with new hashed password
+    user.password = auth.get_password_hash(request.new_password)
+    # Clear reset token
+    user.reset_token = None
+    user.reset_token_expires = None
+    
+    db.commit()
+    
+    return {"message": "Password has been successfully reset"}
