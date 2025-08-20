@@ -1,7 +1,7 @@
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
-from . import schemas
+from app import schemas
 from dotenv import load_dotenv
 import os
 
@@ -35,3 +35,23 @@ def verify_token(token: str, credentials_exception):
         return token_data
     except JWTError:
         raise credentials_exception
+
+def create_password_reset_token(email: str) -> str:
+    expire = datetime.utcnow() + timedelta(hours=24)  # Token expires in 24 hours
+    data = {
+        "sub": email,
+        "type": "password_reset",
+        "exp": expire
+    }
+    return create_access_token(data)
+
+def verify_password_reset_token(token: str) -> str | None:
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("sub")
+        token_type = payload.get("type")
+        if email is None or token_type != "password_reset":
+            return None
+        return email
+    except JWTError:
+        return None

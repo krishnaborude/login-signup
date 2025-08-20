@@ -1,7 +1,8 @@
-from sqlalchemy import Column, String
+from sqlalchemy import Column, String, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
-from .database import Base
+from app.database import Base
+from datetime import datetime
 
 class User(Base):
     __tablename__ = "users"
@@ -10,3 +11,5 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
     password = Column(String)
+    reset_token = Column(String, unique=True, nullable=True)
+    reset_token_expires = Column(DateTime, nullable=True)
