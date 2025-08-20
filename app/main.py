@@ -110,15 +110,19 @@ async def login(login_data: schemas.LoginRequest, db: Session = Depends(get_db))
 
 @app.post("/forgot-password", response_model=schemas.PasswordResetResponse)
 def forgot_password(request: schemas.ForgotPasswordRequest, db: Session = Depends(get_db)):
-    # Find user by email
-    user = db.query(models.User).filter(models.User.email == request.email).first()
+    # Find user by email or username
+    user = db.query(models.User).filter(
+        (models.User.email == request.username_or_email) |
+        (models.User.username == request.username_or_email)
+    ).first()
+    
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="No user found with this email address"
+            detail="No user found with this username or email address"
         )
     
-    # Generate password reset token
+    # Generate password reset token using the user's email
     reset_token = auth.create_password_reset_token(user.email)
     
     # Store token and expiry in database
@@ -129,7 +133,7 @@ def forgot_password(request: schemas.ForgotPasswordRequest, db: Session = Depend
     # In a real application, you would send this token via email
     # For now, we'll return it in the response
     return {
-        "message": "Password reset token has been generated. Please check your email.",
+        "message": f"Password reset token has been generated and sent to {user.email}",
         "reset_token": reset_token  # This would be removed in production
     }
 

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, field_validator, constr
+from pydantic import BaseModel, EmailStr, field_validator
 from uuid import UUID
 import re
 
@@ -17,7 +17,7 @@ def validate_password(password: str) -> str:
 
 class UserBase(BaseModel):
     username: str
-    email: EmailStr  # EmailStr automatically validates email format
+    email: EmailStr
 
 class UserCreate(UserBase):
     password: str
@@ -42,6 +42,10 @@ class TokenData(BaseModel):
 class LoginRequest(BaseModel):
     username_or_email: str
     password: str
+    
+    @field_validator("password")
+    def validate_password_field(cls, v):
+        return validate_password(v)
 
     class Config:
         json_schema_extra = {
@@ -71,14 +75,23 @@ class LoginRequest(BaseModel):
         return schema
 
 class ForgotPasswordRequest(BaseModel):
-    email: EmailStr
+    username_or_email: str
+
+    @field_validator("username_or_email")
+    def validate_username_or_email(cls, v):
+        if "@" in v:  # If it looks like an email
+            try:
+                EmailStr.validate(v)
+            except ValueError:
+                raise ValueError("Invalid email format")
+        return v
 
 class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
-    
+
     @field_validator("new_password")
-    def validate_password_field(cls, v):
+    def validate_new_password(cls, v):
         return validate_password(v)
 
 class PasswordResetResponse(BaseModel):
