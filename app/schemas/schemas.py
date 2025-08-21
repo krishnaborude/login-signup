@@ -99,4 +99,4 @@ class ResetPasswordRequest(BaseModel):
 
 class PasswordResetResponse(BaseModel):
     message: str
-    reset_token: str | None = None
+    reset_token: str
