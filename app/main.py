@@ -106,7 +106,10 @@ async def login(login_data: schemas.LoginRequest, db: Session = Depends(get_db))
     access_token = auth.create_access_token(
         data={"sub": user.email, "username": user.username}
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "message": "Login successful",
+        "access_token": access_token
+    }
 
 @app.post("/forgot-password", response_model=schemas.PasswordResetResponse)
 def forgot_password(request: schemas.ForgotPasswordRequest, db: Session = Depends(get_db)):
@@ -130,8 +133,6 @@ def forgot_password(request: schemas.ForgotPasswordRequest, db: Session = Depend
     user.reset_token_expires = datetime.utcnow() + timedelta(hours=24)
     db.commit()
     
-    # In a real application, you would send this token via email
-    # For now, we'll return it in the response
     return {
         "message": f"Password reset token has been generated and sent to {user.email}",
         "reset_token": reset_token  # This would be removed in production
@@ -160,8 +161,6 @@ def reset_password(request: schemas.ResetPasswordRequest, db: Session = Depends(
             detail="Invalid or expired reset token"
         )
     
-    # Password validation is automatically done by Pydantic
-    # Update password with new hashed password
     user.password = auth.get_password_hash(request.new_password)
     # Clear reset token
     user.reset_token = None
