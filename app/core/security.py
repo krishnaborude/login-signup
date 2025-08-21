@@ -1,7 +1,7 @@
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
-from app import schemas
+from app.schemas.token import TokenData
 from dotenv import load_dotenv
 import os
 
@@ -31,7 +31,7 @@ def verify_token(token: str, credentials_exception):
         email: str = payload.get("sub")
         if email is None:
             raise credentials_exception
-        token_data = schemas.TokenData(email=email)
+        token_data = TokenData(email=email)
         return token_data
     except JWTError:
         raise credentials_exception
