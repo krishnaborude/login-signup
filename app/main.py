@@ -131,7 +131,7 @@ def forgot_password(request: schemas.ForgotPasswordRequest, db: Session = Depend
     
     # Store token and expiry in database
     user.reset_token = reset_token
-    user.reset_token_expires = datetime.utcnow() + timedelta(hours=24)
+    user.reset_token_expires = datetime.utcnow() + timedelta(minutes=5)
     db.commit()
     
     return {
