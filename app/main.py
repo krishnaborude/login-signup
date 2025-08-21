@@ -108,7 +108,8 @@ async def login(login_data: schemas.LoginRequest, db: Session = Depends(get_db))
     )
     return {
         "message": "Login successful",
-        "access_token": access_token
+        "access_token": access_token,
+        "token_type": "bearer"
     }
 
 @app.post("/forgot-password", response_model=schemas.PasswordResetResponse)
