@@ -1,10 +1,18 @@
-fastapi
-uvicorn
-sqlalchemy
-psycopg2-binary
-python-jose
-passlib[bcrypt]
-python-multipart
-pydantic[email]
-python-dotenv
-bcrypt==3.2.2
+# Web Framework and ASGI Server
+fastapi>=0.103.0         # Modern, fast web framework for building APIs
+uvicorn>=0.23.2         # Lightning-fast ASGI server
+
+# Database
+sqlalchemy>=2.0.20      # SQL toolkit and ORM
+psycopg2-binary>=2.9.7  # PostgreSQL adapter for Python
+python-dotenv>=1.0.0    # Environment variable management
+
+# Authentication and Security
+python-jose>=3.3.0      # JavaScript Object Signing and Encryption
+passlib[bcrypt]>=1.7.4  # Password hashing library
+bcrypt>=4.0.1           # Modern password hashing
+
+# Data Validation and Parsing
+pydantic[email]>=2.3.0  # Data validation using Python type hints
+email-validator>=2.0.1  # Email validation library
+python-multipart>=0.0.6 # Multipart form data parsing

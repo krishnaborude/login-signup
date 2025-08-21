@@ -8,15 +8,23 @@ A robust authentication API built with FastAPI and PostgreSQL that provides secu
 
 ## Features
 
-- 🔐 User Registration (Signup)
-- 🔑 User Authentication (Login)
-- 📧 Support for both username and email login
-- 🔒 Secure password hashing using bcrypt
-- 🎟️ JWT token-based authentication
-- 🛡️ Input validation using Pydantic
-- 📦 PostgreSQL database with SQLAlchemy ORM
-- 🚀 Async API endpoints
-- 📝 Interactive API documentation
+- � User Authentication
+  - Email-based login
+  - Secure password hashing
+  - JWT token-based authentication
+  - Display name support
+  
+- 🔐 Security Features
+  - Password validation with strict requirements
+  - Email validation and normalization
+  - Token-based password reset
+  - Protection against common security threats
+  
+- � Database
+  - PostgreSQL integration
+  - SQLAlchemy ORM
+  - Efficient connection management
+  - Data persistence
 
 ## Tech Stack
 
@@ -99,43 +107,43 @@ A robust authentication API built with FastAPI and PostgreSQL that provides secu
 
 ## API Endpoints
 
-### 1. User Registration (Signup)
-- **Endpoint**: `/signup`
-- **Method**: `POST`
-- **Request Body**:
+### Authentication
+- `POST /api/v1/signup`
   ```json
   {
-    "username": "your_username",
-    "email": "your_email@example.com",
-    "password": "your_password"
+    "email": "user@example.com",
+    "display_name": "John Doe",
+    "password": "SecurePass123!"
   }
   ```
-- **Response**:
-  ```json
-  {
-    "username": "your_username",
-    "email": "your_email@example.com",
-    "id": "generated-uuid"
-  }
-  ```
+  Response includes user details and welcome message.
 
-### 2. User Login
-- **Endpoint**: `/login`
-- **Method**: `POST`
-- **Request Body**:
+- `POST /api/v1/login`
   ```json
   {
-    "username": "your_username_or_email",
-    "password": "your_password"
+    "email": "user@example.com",
+    "password": "SecurePass123!"
   }
   ```
-- **Response**:
+  Response includes access token and welcome message.
+
+### Password Management
+- `POST /api/v1/forgot-password`
   ```json
   {
-    "access_token": "jwt_token",
-    "token_type": "bearer"
+    "email": "user@example.com"
   }
   ```
+  Returns password reset token.
+
+- `POST /api/v1/reset-password`
+  ```json
+  {
+    "token": "reset_token_here",
+    "new_password": "NewSecurePass123!"
+  }
+  ```
+  Resets password and confirms success.
 
 ## Features in Detail
 

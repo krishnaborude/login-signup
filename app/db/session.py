@@ -18,4 +18,6 @@ def get_db():
 
 def create_tables_if_not_exist():
     from app.models.user import User  # Import models here to avoid circular imports
+    
+    # Only create tables if they don't exist
     Base.metadata.create_all(bind=engine)
