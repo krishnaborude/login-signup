@@ -2,6 +2,7 @@ from pydantic import BaseModel, field_validator
 from email_validator import validate_email, EmailNotValidError
 
 class Token(BaseModel):
+    welcome_message: str
     message: str
     access_token: str
     token_type: str
@@ -10,8 +11,16 @@ class TokenData(BaseModel):
     email: str | None = None
 
 class LoginRequest(BaseModel):
-    username_or_email: str
+    email: str
     password: str
+
+    @field_validator("email")
+    def validate_email(cls, v):
+        try:
+            validate_email(v)
+            return v.lower()  # normalize email to lowercase
+        except EmailNotValidError:
+            raise ValueError("Invalid email format")
 
     @field_validator("password")
     def validate_password_field(cls, v):
@@ -21,22 +30,21 @@ class LoginRequest(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "username_or_email": "your_username_or_email",
+                "email": "your.email@example.com",
                 "password": "your_password"
             }
         }
 
 class ForgotPasswordRequest(BaseModel):
-    username_or_email: str
+    email: str
 
-    @field_validator("username_or_email")
-    def validate_username_or_email(cls, v):
-        if "@" in v:  # If it looks like an email
-            try:
-                validate_email(v)
-            except EmailNotValidError:
-                raise ValueError("Invalid email format")
-        return v
+    @field_validator("email")
+    def validate_email(cls, v):
+        try:
+            validate_email(v)
+            return v.lower()  # normalize email to lowercase
+        except EmailNotValidError:
+            raise ValueError("Invalid email format")
 
 class ResetPasswordRequest(BaseModel):
     token: str
@@ -50,3 +58,6 @@ class ResetPasswordRequest(BaseModel):
 class PasswordResetResponse(BaseModel):
     message: str
     reset_token: str
+
+class PasswordResetSuccessResponse(BaseModel):
+    message: str
