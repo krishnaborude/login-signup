@@ -11,7 +11,7 @@ from app.core.security import (
     verify_password_reset_token
 )
 from app.models.user import User
-from app.schemas.user import UserCreate, User as UserSchema
+from app.schemas.user import UserCreate, UserResponse
 from app.schemas.token import (
     Token,
     LoginRequest,
@@ -23,7 +23,7 @@ from app.schemas.token import (
 
 router = APIRouter()
 
-@router.post("/signup", response_model=UserSchema)
+@router.post("/signup", response_model=UserResponse)
 def signup(user: UserCreate, db: Session = Depends(get_db)):
     # Check if email is already registered
     db_user = db.query(User).filter(User.email == user.email).first()

@@ -16,9 +16,13 @@ class LoginRequest(BaseModel):
 
     @field_validator("email")
     def validate_email(cls, v):
+        # First check if email contains any uppercase letters
+        if any(c.isupper() for c in v):
+            raise ValueError("Email must be in lowercase letters only")
+            
         try:
             validate_email(v)
-            return v.lower()  # normalize email to lowercase
+            return v  # No need to call lower() since we already ensure it's lowercase
         except EmailNotValidError:
             raise ValueError("Invalid email format")
 
@@ -40,9 +44,13 @@ class ForgotPasswordRequest(BaseModel):
 
     @field_validator("email")
     def validate_email(cls, v):
+        # First check if email contains any uppercase letters
+        if any(c.isupper() for c in v):
+            raise ValueError("Email must be in lowercase letters only")
+            
         try:
             validate_email(v)
-            return v.lower()  # normalize email to lowercase
+            return v  # No need to call lower() since we already ensure it's lowercase
         except EmailNotValidError:
             raise ValueError("Invalid email format")
 

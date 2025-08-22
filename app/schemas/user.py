@@ -1,5 +1,4 @@
 from pydantic import BaseModel, field_validator
-from uuid import UUID
 import re
 from email_validator import validate_email, EmailNotValidError
 
@@ -28,20 +27,32 @@ def validate_display_name(display_name: str) -> str:
     return display_name
 
 class UserBase(BaseModel):
-    display_name: str
     email: str
+    display_name: str
     
     @field_validator("email")
     def validate_email(cls, v):
+        # First check if email contains any uppercase letters
+        if any(c.isupper() for c in v):
+            raise ValueError("Email must be in lowercase letters only")
+        
         try:
             validate_email(v)
-            return v.lower()  # normalize email to lowercase
+            return v  # No need to call lower() since we already ensure it's lowercase
         except EmailNotValidError:
             raise ValueError("Invalid email format")
 
     @field_validator("display_name")
     def validate_display_name_field(cls, v):
         return validate_display_name(v)
+
+class UserResponse(BaseModel):
+    welcome_message: str | None = None
+    email: str
+    id: int
+
+    class Config:
+        from_attributes = True
 
 class UserCreate(UserBase):
     password: str
@@ -50,9 +61,8 @@ class UserCreate(UserBase):
     def validate_password_field(cls, v):
         return validate_password(v)
 
-class User(UserBase):
-    id: UUID
-    welcome_message: str | None = None
+class User(UserResponse):
+    display_name: str
 
     class Config:
         from_attributes = True
