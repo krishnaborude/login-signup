@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
-from app.api import auth
+from app.api import auth, email
 from app.db.session import create_tables_if_not_exist
 import logging
 
@@ -38,8 +38,14 @@ app.add_middleware(
 # Include routers
 app.include_router(
     auth.router,
-    prefix="/api",
+    prefix=f"{settings.API_V1_STR}/auth",
     tags=["authentication"]
+)
+
+app.include_router(
+    email.router,
+    prefix=f"{settings.API_V1_STR}/email",
+    tags=["email"]
 )
 
 @app.get("/")

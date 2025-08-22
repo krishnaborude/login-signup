@@ -17,6 +17,10 @@ class Settings(BaseModel):
     SECRET_KEY: str = os.getenv("SECRET_KEY")
     ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+    
+    # Gmail configuration
+    GMAIL_ADDRESS: str = os.getenv("GMAIL_ADDRESS")
+    GMAIL_APP_PASSWORD: str = os.getenv("GMAIL_APP_PASSWORD")
 
     class Config:
         case_sensitive = True
@@ -24,3 +28,5 @@ class Settings(BaseModel):
 @lru_cache()
 def get_settings():
     return Settings()
+
+settings = get_settings()
