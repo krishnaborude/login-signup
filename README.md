@@ -2,7 +2,7 @@
 
 A robust authentication API built with FastAPI and PostgreSQL that provides secure user registration and login functionality.
 
-🌐 **Live API**: [https://login-signup-r2s9.onrender.com](https://login-signup-r2s9.onrender.com)
+🌐 **Live API**: [https://login-signup-r2s9.onrender.com/](https://login-signup-r2s9.onrender.com/)
 - API Documentation: [https://login-signup-r2s9.onrender.com/docs](https://login-signup-r2s9.onrender.com/docs)
 - Alternative Documentation: [https://login-signup-r2s9.onrender.com/redoc](https://login-signup-r2s9.onrender.com/redoc)
 
