@@ -1,5 +1,4 @@
 from pydantic import BaseModel, field_validator
-from uuid import UUID
 import re
 from email_validator import validate_email, EmailNotValidError
 
@@ -28,8 +27,8 @@ def validate_display_name(display_name: str) -> str:
     return display_name
 
 class UserBase(BaseModel):
-    display_name: str
     email: str
+    display_name: str
     
     @field_validator("email")
     def validate_email(cls, v):
@@ -47,6 +46,14 @@ class UserBase(BaseModel):
     def validate_display_name_field(cls, v):
         return validate_display_name(v)
 
+class UserResponse(BaseModel):
+    welcome_message: str | None = None
+    email: str
+    id: int
+
+    class Config:
+        from_attributes = True
+
 class UserCreate(UserBase):
     password: str
     
@@ -54,9 +61,8 @@ class UserCreate(UserBase):
     def validate_password_field(cls, v):
         return validate_password(v)
 
-class User(UserBase):
-    id: UUID
-    welcome_message: str | None = None
+class User(UserResponse):
+    display_name: str
 
     class Config:
         from_attributes = True

@@ -3,9 +3,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
 from app.api.v1 import auth
 from app.db.session import create_tables_if_not_exist
+import logging
 
-# Initialize database tables without dropping existing data
-create_tables_if_not_exist()
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+try:
+    # Initialize database tables without dropping existing data
+    logger.info("Initializing database tables...")
+    create_tables_if_not_exist()
+    logger.info("Database tables initialized successfully")
+except Exception as e:
+    logger.error(f"Error initializing database: {str(e)}")
+    raise
 
 settings = get_settings()
 
@@ -38,3 +49,11 @@ async def root():
         "docs_url": "/docs",
         "version": "1.0.0"
     }
+
+@app.on_event("startup")
+async def startup_event():
+    logger.info("Application starting up...")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    logger.info("Application shutting down...")
