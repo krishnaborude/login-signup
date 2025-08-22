@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
-from app.api.v1 import auth
+from app.api import auth
 from app.db.session import create_tables_if_not_exist
 import logging
 
@@ -30,7 +30,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allows all origins
-    allow_credentials=True,
+    allow_credentials=True, # Allows cookies to be sent with requests
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
 )
@@ -38,7 +38,7 @@ app.add_middleware(
 # Include routers
 app.include_router(
     auth.router,
-    prefix="/api/v1",
+    prefix="/api",
     tags=["authentication"]
 )
 
